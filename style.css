@@ -1,0 +1,24 @@
+
+:root{--bg:#12122b;--bg2:#1b1b3a;--gold:#c9a86a;--ink:#f2ecdd;--sub:#b9b4a3}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;line-height:1.8}
+a{color:var(--gold)}
+header{background:var(--bg2);padding:14px 20px;border-bottom:1px solid var(--gold)}
+.brand a{color:var(--ink);text-decoration:none;font-weight:bold;font-size:1.1rem}
+nav{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px 16px}
+nav a{text-decoration:none;font-size:.92rem}
+main{max-width:960px;margin:0 auto;padding:24px 20px 48px}
+.hero{padding:24px 0 8px}
+.hero h1{font-size:2rem;color:var(--gold);margin:0 0 8px}
+h2{color:var(--gold);border-bottom:1px solid #34345e;padding-bottom:4px;margin-top:36px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:16px}
+.card{background:var(--bg2);border:1px solid #34345e;border-radius:10px;padding:16px}
+.card h3{margin:0 0 6px;font-size:1.02rem}
+.card p{margin:4px 0;font-size:.94rem;color:var(--ink)}
+.btn{display:inline-block;background:var(--gold);color:#12122b !important;padding:6px 14px;border-radius:6px;text-decoration:none;font-weight:bold}
+.signs{display:flex;flex-wrap:wrap;gap:10px}
+.sign{background:var(--bg2);border:1px solid var(--gold);border-radius:8px;padding:8px 14px;text-decoration:none;text-align:center}
+.sign span{display:block;font-size:.75rem;color:var(--sub)}
+.pr,.warn{background:#2a2417;border:1px solid var(--gold);border-radius:8px;padding:10px 14px;font-size:.9rem}
+footer{background:var(--bg2);padding:20px;font-size:.85rem;color:var(--sub);border-top:1px solid #34345e}
+.sign-card span{font-size:.8rem;color:var(--sub)}
