@@ -7,5 +7,5 @@ Felis cattus のアフィリエイトサイト（GitHub Pages）。
 1. GitHub アカウント felis-cattus222（felis.cattus222@gmail.com で新規登録）でリポジトリ `felis-cattus` を作成
 2. このフォルダの中身を push
 3. Settings → Pages → Branch: main / root で公開
-4. 公開URLを Amazonアソシエイトにサイト追加登録してから、リンクの収益化を開始する
+4. アフィリエイトは楽天中心（2026-11-15 本人決定でAmazonは使わない）。楽天アフィリエイトリンクが発行できたら、検索リンクを hb.afl リンクへ差し替える
 5. Google Search Console に登録し、sitemap.xml を送信

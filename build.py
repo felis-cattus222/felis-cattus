@@ -2,14 +2,15 @@
 # Felis cattus affiliate site - static generator (MVP)
 # Product data source of truth: ~/workspace/felis_cattus/ad_list.md etc.
 # This script holds a curated subset for the MVP pages.
-import os, html
+import os, html, urllib.parse
 
 OUT = os.path.dirname(os.path.abspath(__file__))
 BASE = "https://felis-cattus222.github.io/felis-cattus/"
-TAG = "cat22202-22"
 
-def amz(asin):
-    return f"https://www.amazon.co.jp/dp/{asin}?tag={TAG}"
+def rsearch(query):
+    # Plain Rakuten search link (NOT an affiliate link).
+    # Rakuten affiliate (hb.afl) links will replace these once issued.
+    return "https://search.rakuten.co.jp/search/mall/" + urllib.parse.quote(query) + "/"
 
 NAV = [
     ("index.html", "トップ"),
@@ -44,7 +45,7 @@ def page(title, desc, body, pr=False):
 {body}
 </main>
 <footer>
-<p>Felis cattus は、Amazonアソシエイト・プログラムの参加者です。適格販売により収入を得ています。</p>
+<p>当サイトの一部リンクは、楽天アフィリエイト等の広告リンクです。リンク先で購入された場合、当サイトが紹介料を受け取ることがあります。</p>
 <p><a href="disclosure.html">アフィリエイト開示・プライバシー</a> ／ お問い合わせ：felis.cattus222@gmail.com</p>
 <p>星読みは自己理解のための読み物です。身体の対応は各体系の伝統とFelis cattusのメソッドに基づくもので、医療の診断・治療の根拠ではありません。</p>
 <p>© Felis cattus</p>
@@ -53,11 +54,12 @@ def page(title, desc, body, pr=False):
 </html>
 """
 
-def card(title, text, url, label="Amazonで見る"):
+def card(title, text, url, label="楽天で探す", sponsored=False):
+    rel = "sponsored nofollow noopener" if sponsored else "noopener"
     return f"""<div class="card">
 <h3>{html.escape(title)}</h3>
 <p>{html.escape(text)}</p>
-<p><a class="btn" href="{url}" target="_blank" rel="sponsored nofollow noopener">{label}</a></p>
+<p><a class="btn" href="{url}" target="_blank" rel="{rel}">{label}</a></p>
 </div>"""
 
 def cards(items):
@@ -94,7 +96,7 @@ index_body = f"""
 <h2>カテゴリ</h2>
 {cards([
     card("学ぶ｜本の道具箱", "占星術・経絡・身体構造。メソッドの土台になった本と、現場で使われる専門書。", "books.html", "ページを開く"),
-    card("香る｜星座とアロマ", "12星座×アロマ対応表の無料要約と、ASIN確認済みの精油リンク。", "aroma.html", "ページを開く"),
+    card("香る｜星座とアロマ", "12星座×アロマ対応表の無料要約との精油リンク。", "aroma.html", "ページを開く"),
     card("整える｜月と星の道具", "プラネタリウム、月ライト、猫と星の雑貨。夜の星読み時間のお供に。", "goods.html", "ページを開く"),
     card("猫と暮らす", "楽天のペット用品と、222キャラ工房のLINEスタンプ。", "cats.html", "ページを開く"),
 ])}
@@ -105,7 +107,7 @@ index_body = f"""
 ])}
 """
 write = lambda name, content: open(os.path.join(OUT, name), "w", encoding="utf-8").write(content)
-write("index.html", page("トップ", "Felis cattusの独自メソッド「エナジー・ゾディアック」の道具箱。12星座×身体マップ、本、アロマ、月と星のグッズ。", index_body, pr=True))
+write("index.html", page("トップ", "Felis cattusの独自メソッド「エナジー・ゾディアック」の道具箱。12星座×身体マップ、本、アロマ、月と星のグッズ。", index_body))
 
 # ---------- map ----------
 rows = "\n".join(
@@ -142,16 +144,16 @@ specialist = [
     ("筋骨格系のキネシオロジー 原著第3版", "運動学の専門書。", "4263265815"),
     ("姿勢の教科書", "姿勢を体系的に学ぶ一冊。", "4816359257"),
 ]
-books_body = "<h1>学ぶ｜本の道具箱</h1><p>メソッドの土台になった本を、テーマ別に置いています。価格は変動するため表示していません。各リンク先でご確認ください。</p>"
-books_body += "<h2>占星術・経絡・身体構造の参考書</h2>" + cards([card(t, x, amz(a)) for t, x, a in books])
-books_body += "<h2>現場で使われる専門書</h2>" + cards([card(t, x, amz(a)) for t, x, a in specialist])
-write("books.html", page("学ぶ｜本の道具箱", "占星術・経絡・筋膜・解剖学の参考書と専門書。エナジー・ゾディアックの土台の本棚。", books_body, pr=True))
+books_body = "<h1>学ぶ｜本の道具箱</h1><p>メソッドの土台になった本を、テーマ別に置いています。価格は変動するため表示していません。各リンク先でご確認ください。リンクは楽天市場の検索ページへの通常リンクです（楽天アフィリエイトリンクは準備中）。</p>"
+books_body += "<h2>占星術・経絡・身体構造の参考書</h2>" + cards([card(t, x, rsearch(t)) for t, x, a in books])
+books_body += "<h2>現場で使われる専門書</h2>" + cards([card(t, x, rsearch(t)) for t, x, a in specialist])
+write("books.html", page("学ぶ｜本の道具箱", "占星術・経絡・筋膜・解剖学の参考書と専門書。エナジー・ゾディアックの土台の本棚。", books_body))
 
 # ---------- aroma ----------
 oils = [
-    ("ローズ 精油 10ml（Kahuro）", "ローズの香り。ASIN確認済み。", "B0CYT3YRQ7"),
-    ("フランキンセンス 精油 10ml（Kahuro）", "フランキンセンスの香り。ASIN確認済み。", "B0CYT4MTNC"),
-    ("ローズマリー 精油 50ml（Kahuro）", "ローズマリーの香り。ASIN確認済み。", "B0CCNN791F"),
+    ("ローズ 精油 10ml（Kahuro）", "ローズの香り。", "B0CYT3YRQ7"),
+    ("フランキンセンス 精油 10ml（Kahuro）", "フランキンセンスの香り。", "B0CYT4MTNC"),
+    ("ローズマリー 精油 50ml（Kahuro）", "ローズマリーの香り。", "B0CCNN791F"),
     ("生活の木 エッセンシャルオイル 3本セット", "オレンジスイート・ラベンダー・ペパーミント各5ml。まず試すならこのセット。", "B0FC66FMQG"),
 ]
 aroma_body = """
@@ -161,10 +163,10 @@ aroma_body = """
 <h2>考え方</h2>
 <p>星座のエレメント（火・地・風・水）と、その星座の経絡・感情のテーマに合わせて香りを選ぶのがFelis cattusのやり方です。効能を約束するものではなく、その日の自分を眺めるための小さな道具として使います。星座ごとの対応表は有料記事でどうぞ。</p>
 <p><a class="btn" href="https://note.com/felis_cattus">note「Felis cattus」で対応表を見る</a></p>
-<h2>リンクが確定している精油</h2>
-<p>AmazonでASINを確認できたものだけを置いています（未確認の精油はリンクを作っていません）。</p>
-""" + cards([card(t, x, amz(a)) for t, x, a in oils])
-write("aroma.html", page("香る｜星座とアロマ", "12星座×アロマ対応表の考え方と、ASIN確認済みの精油リンク。精油は猫に使わない注意書き付き。", aroma_body, pr=True))
+<h2>香りの候補</h2>
+<p>実在が確認できた精油だけを置いています。リンクは楽天市場の検索ページへの通常リンクです（楽天アフィリエイトリンクは準備中）。</p>
+""" + cards([card(t, x, rsearch(t)) for t, x, a in oils])
+write("aroma.html", page("香る｜星座とアロマ", "12星座×アロマ対応表の考え方と、精油の楽天検索リンク。精油は猫に使わない注意書き付き。", aroma_body))
 
 # ---------- goods ----------
 goods = [
@@ -179,8 +181,8 @@ goods = [
     ("ムーンオロジーオラクルカード（ヤスミン・ボーランド）", "月と星座の記事のお供に。結果を断定するものではなく、眺める道具として。", "4908650926"),
 ]
 goods_body = "<h1>整える｜月と星の道具</h1><p>月・星・猫のモチーフの道具と雑貨。週替わりコーナー「今週の開運グッズ」（note・毎週月曜）の置き場も兼ねています。縁起物・インテリアとしての紹介で、効果を約束するものではありません。価格は変動するため表示していません。</p>"
-goods_body += cards([card(t, x, amz(a)) for t, x, a in goods])
-write("goods.html", page("整える｜月と星の道具", "プラネタリウム、月ライト、招き猫、猫と星の雑貨。", goods_body, pr=True))
+goods_body += "<p>リンクは楽天市場の検索ページへの通常リンクです（楽天アフィリエイトリンクは準備中）。</p>" + cards([card(t, x, rsearch(t)) for t, x, a in goods])
+write("goods.html", page("整える｜月と星の道具", "プラネタリウム、月ライト、招き猫、猫と星の雑貨。", goods_body))
 
 # ---------- cats (Rakuten links verbatim from affiliate_materials_2026-11-15.md) ----------
 rakuten = [
@@ -192,7 +194,7 @@ rakuten = [
     ("ライオン PETKISS 歯みがきシート", "https://hb.afl.rakuten.co.jp/ichiba/598500f9.bf05e775.598500fa.6470c262/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fchanet%2F177329%2F&link_type=picttext&ut=eyJwYWdlIjoiaXRlbSIsInR5cGUiOiJwaWN0dGV4dCIsInNpemUiOiIyNDB4MjQwIiwibmFtIjoxLCJuYW1wIjoicmlnaHQiLCJjb20iOjEsImNvbXAiOiJkb3duIiwicHJpY2UiOjEsImJvciI6MSwiY29sIjoxLCJiYnRuIjoxLCJwcm9kIjowLCJhbXAiOmZhbHNlfQ%3D%3D"),
 ]
 cats_body = "<h1>猫と暮らす</h1><p>一緒に暮らす猫のための日用品（楽天）と、Felis cattusの世界観のLINEスタンプ。</p><h2>楽天のペット用品</h2>"
-cats_body += cards([card(t, "楽天市場の商品ページへ。", u, "楽天で見る") for t, u in rakuten])
+cats_body += cards([card(t, "楽天市場の商品ページへ（広告リンク）。", u, "楽天で見る", sponsored=True) for t, u in rakuten])
 cats_body += """
 <h2>LINEスタンプ｜222キャラ工房</h2>
 <p>セラフィナのヨガスタンプ、専門家シリーズ、猫の毎日スタンプなど全14セット。制作者ページからどうぞ。</p>
@@ -230,7 +232,7 @@ write("about.html", page("Felis cattusについて", "エナジー・ゾディ�
 disclosure_body = """
 <h1>アフィリエイト開示・プライバシー</h1>
 <h2>アフィリエイトについて</h2>
-<p>当サイトは、Amazonアソシエイト・プログラムおよび楽天アフィリエイト等の参加者です。ページ内のリンクから商品を購入された場合、当サイトが紹介料を受け取ることがあります。リンクのあるページには「PR」表記を置いています。商品価格は変動するため、当サイトでは原則として表示していません。各販売ページでご確認ください。</p>
+<p>当サイトは、楽天アフィリエイト等の参加者です。「猫と暮らす」ページの楽天リンクは広告リンクで、リンクから商品を購入された場合、当サイトが紹介料を受け取ることがあります。広告リンクのあるページには「PR」表記を置いています。「学ぶ」「香る」「整える」ページのリンクは、楽天市場の検索ページへの通常リンクです（アフィリエイトリンクは準備中）。商品価格は変動するため、当サイトでは原則として表示していません。各販売ページでご確認ください。</p>
 <h2>表現について</h2>
 <p>当サイトは効能・効果や運気の向上を約束する表現を使いません。星読みは自己理解のための読み物としてお楽しみください。精油は猫に使用しないでください。</p>
 <h2>プライバシー</h2>
@@ -277,7 +279,7 @@ Felis cattus のアフィリエイトサイト（GitHub Pages）。
 1. GitHub アカウント felis-cattus222（felis.cattus222@gmail.com で新規登録）でリポジトリ `felis-cattus` を作成
 2. このフォルダの中身を push
 3. Settings → Pages → Branch: main / root で公開
-4. 公開URLを Amazonアソシエイトにサイト追加登録してから、リンクの収益化を開始する
+4. アフィリエイトは楽天中心（2026-11-15 本人決定でAmazonは使わない）。楽天アフィリエイトリンクが発行できたら、検索リンクを hb.afl リンクへ差し替える
 5. Google Search Console に登録し、sitemap.xml を送信
 """)
 print("built:", pages)
