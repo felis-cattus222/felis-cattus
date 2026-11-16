@@ -1,4 +1,4 @@
-# Felis cattus｜星と身体の道具箱
+# Felis cattus｜エナジー・ゾディアック（星と身体の道具箱）
 
 Felis cattus のアフィリエイトサイト（GitHub Pages）。
 生成：`python3 build.py` で HTML を再生成します。商品の正本は `~/workspace/felis_cattus/ad_list.md` 系。

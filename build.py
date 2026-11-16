@@ -31,13 +31,17 @@ def page(title, desc, body, pr=False):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{html.escape(title)}｜Felis cattus 星と身体の道具箱</title>
+<title>{html.escape(title)}｜Felis cattus｜エナジー・ゾディアック</title>
 <meta name="description" content="{html.escape(desc)}">
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header>
-<div class="brand"><a href="index.html">🐈‍⬛ Felis cattus｜星と身体の道具箱</a></div>
+<div class="brand"><a href="index.html"><img class="logo" src="logo.png" alt="Felis cattus ロゴ（黒猫と白猫）"><span class="brand-text">Felis cattus｜エナジー・ゾディアック<span class="brand-sub">星と身体の道具箱</span></span></a></div>
 <nav>{nav}</nav>
 </header>
 <main>
@@ -87,10 +91,17 @@ sign_links = "\n".join(
     f'<a class="sign" href="map.html#{s[0]}">{s[0]}<span>{s[1]}</span></a>' for s in SIGNS)
 index_body = f"""
 <section class="hero">
-<h1>星と身体の道具箱</h1>
-<p>Felis cattus の独自メソッド「エナジー・ゾディアック」――12星座と、身体・経絡・感情の対応を読み解く道具を集めた小さなサイトです。</p>
-<p>毎日の星読みは <a href="https://note.com/felis_cattus">note「Felis cattus」</a> で更新中。ここは、その読みを深めるための本・香り・道具の置き場です。</p>
+<p class="hero-logo"><img src="logo.png" alt="黒猫と白猫とホロスコープの環"></p>
+<h1>明日の星を、身体で読む。</h1>
+<p class="statement">エナジー・ゾディアックは、12星座と身体・経絡・感情の対応を読み解く、Felis cattus の独自メソッドです。提唱者は臨床30年の鍼灸師。星の位置は天文データで検証し、裏付けのない対応は作りません。</p>
+<p>このサイトは、そのメソッドの入口です。毎日の星読みは <a href="https://note.com/felis_cattus">note「Felis cattus」</a> で毎夕更新しています。</p>
 </section>
+<h2>はじめ方｜3つのステップ</h2>
+{cards([
+    card("STEP 1｜毎日の星読みを読む", "明日のチャートと身体のテーマを、毎夕noteで無料配信。まず流れをつかむところから。", "https://note.com/felis_cattus", "noteで読む"),
+    card("STEP 2｜自分の星座の身体マップを知る", "あなたの星座は、身体のどこ・どの経絡・どんな感情と対応しているのか。メソッドの中心にある対応表です。", "map.html", "マップを見る"),
+    card("STEP 3｜自分専用の鑑定書を注文する", "出生図と2027年の流れを読む、あなただけの鑑定書（A4・8ページ）。", "shop.html", "鑑定・商品を見る"),
+])}
 <h2>まず自分の星座から</h2>
 <div class="signs">{sign_links}</div>
 <h2>カテゴリ</h2>
@@ -107,7 +118,7 @@ index_body = f"""
 ])}
 """
 write = lambda name, content: open(os.path.join(OUT, name), "w", encoding="utf-8").write(content)
-write("index.html", page("トップ", "Felis cattusの独自メソッド「エナジー・ゾディアック」の道具箱。12星座×身体マップ、本、アロマ、月と星のグッズ。", index_body))
+write("index.html", page("トップ", "「明日の星を、身体で読む。」独自メソッド「エナジー・ゾディアック」の公式サイト。12星座×身体マップ、本、アロマ、月と星のグッズ、鑑定書。", index_body))
 
 # ---------- map ----------
 rows = "\n".join(
@@ -224,10 +235,13 @@ about_body = """
 <h2>エナジー・ゾディアックとは</h2>
 <p>西洋占星術の12星座（メロテシアの伝統）、中医学の経絡と五臓の伝統対応、そして身体のつながりを重ねた、Felis cattus オリジナルの読みの枠組みです。対応の正本は <a href="map.html">12星座×身体マップ</a> に公開しています。裏付けのない対応は作らないことが、このメソッドの約束です。</p>
 <p>星読みは自己理解のための読み物です。医療の診断・治療の代わりにはなりません。体調の心配は専門家へご相談ください。</p>
+<h2>提唱者について</h2>
+<p>平賀建人（ひらが・けんと）――臨床30年のセラピスト、鍼灸師。資格：鍼灸師／登録販売者／パーソナルトレーナー。施術の現場で経絡と身体に向き合ってきた経験と、武術45年の稽古で培った身体感覚を土台に、占星術の伝統的な身体対応（メロテシア）を重ねて「エナジー・ゾディアック」を組み立てました。</p>
+<p>星の位置の計算にはNASA JPLの天文データを使い、毎日の記事は公開前に日付・サイン・天文イベントを全件照合しています。「裏付けのない対応は作らない」は、このメソッドの一番の約束です。</p>
 <h2>お問い合わせ</h2>
 <p>メール：felis.cattus222@gmail.com</p>
 """
-write("about.html", page("Felis cattusについて", "エナジー・ゾディアックとは。Felis cattusの紹介と問い合わせ先。", about_body))
+write("about.html", page("Felis cattusについて", "エナジー・ゾディアックとは。提唱者・平賀建人（臨床30年・鍼灸師）のプロフィールと問い合わせ先。", about_body))
 
 disclosure_body = """
 <h1>アフィリエイト開示・プライバシー</h1>
@@ -247,7 +261,14 @@ write("style.css", """
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;line-height:1.8}
 a{color:var(--gold)}
 header{background:var(--bg2);padding:14px 20px;border-bottom:1px solid var(--gold)}
-.brand a{color:var(--ink);text-decoration:none;font-weight:bold;font-size:1.1rem}
+.brand a{color:var(--ink);text-decoration:none;font-weight:bold;font-size:1.1rem;display:flex;align-items:center;gap:12px}
+.brand .logo{width:46px;height:46px;border-radius:50%;flex:none}
+.brand-text{line-height:1.35}
+.brand-sub{display:block;font-size:.78rem;color:var(--sub);font-weight:normal;letter-spacing:.12em}
+h1,h2,.brand a{font-family:"Noto Serif JP","Hiragino Mincho ProN","Yu Mincho",serif}
+.hero-logo{margin:0 0 12px}
+.hero-logo img{width:118px;height:118px;border-radius:50%}
+.statement{font-size:1.03rem}
 nav{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px 16px}
 nav a{text-decoration:none;font-size:.92rem}
 main{max-width:960px;margin:0 auto;padding:24px 20px 48px}
@@ -270,7 +291,7 @@ pages = ["index.html","map.html","books.html","aroma.html","goods.html","cats.ht
 sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "\n".join(f"<url><loc>{BASE}{p}</loc></url>" for p in pages) + "\n</urlset>\n"
 write("sitemap.xml", sitemap)
 write("robots.txt", f"User-agent: *\nAllow: /\nSitemap: {BASE}sitemap.xml\n")
-write("README.md", """# Felis cattus｜星と身体の道具箱
+write("README.md", """# Felis cattus｜エナジー・ゾディアック（星と身体の道具箱）
 
 Felis cattus のアフィリエイトサイト（GitHub Pages）。
 生成：`python3 build.py` で HTML を再生成します。商品の正本は `~/workspace/felis_cattus/ad_list.md` 系。
