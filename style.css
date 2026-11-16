@@ -29,3 +29,8 @@ h2{color:var(--gold);border-bottom:1px solid #34345e;padding-bottom:4px;margin-t
 .pr,.warn{background:#2a2417;border:1px solid var(--gold);border-radius:8px;padding:10px 14px;font-size:.9rem}
 footer{background:var(--bg2);padding:20px;font-size:.85rem;color:var(--sub);border-top:1px solid #34345e}
 .sign-card span{font-size:.8rem;color:var(--sub)}
+.samples{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-top:16px}
+.samples figure{margin:0}
+.samples img{width:100%;border-radius:6px;border:1px solid var(--gold);display:block}
+.samples figcaption{font-size:.85rem;color:var(--sub);text-align:center;margin-top:6px}
+blockquote.sample-read{margin:16px 0;padding:14px 18px;background:var(--bg2);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;font-size:.98rem}
