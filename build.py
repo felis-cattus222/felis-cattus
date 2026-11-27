@@ -23,16 +23,40 @@ NAV = [
     ("about.html", "Felis cattusについて"),
 ]
 
-def page(title, desc, body, pr=False):
+GOOGLE_VERIFY = "t9t3j8rCoSz4DWg8ylktuEGbVX-RqLjXez0lJ0F6ABY"  # Search Console verification (issued 2026-11-16)
+
+def page(title, desc, body, fname, pr=False):
     nav = "\n".join(f'<a href="{h}">{t}</a>' for h, t in NAV)
     pr_note = '<p class="pr">PR：このページにはアフィリエイトリンク（広告）が含まれます。</p>' if pr else ""
+    url = BASE if fname == "index.html" else BASE + fname
+    verify = f'\n<meta name="google-site-verification" content="{GOOGLE_VERIFY}">' if GOOGLE_VERIFY else ""
+    ld = {
+        "@context": "https://schema.org",
+        "@graph": [
+            {"@type": "WebSite", "name": "Felis cattus｜エナジー・ゾディアック", "url": BASE},
+            {"@type": "Person", "name": "平賀建人", "jobTitle": ["鍼灸師", "登録販売者", "パーソナルトレーナー"],
+             "description": "臨床30年のセラピスト。独自メソッド「エナジー・ゾディアック」提唱者。"},
+            {"@type": "WebPage", "name": title, "description": desc, "url": url, "isPartOf": {"@type": "WebSite", "url": BASE}},
+        ],
+    }
+    import json as _json
+    ld_json = _json.dumps(ld, ensure_ascii=False)
     return f"""<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{html.escape(title)}｜Felis cattus｜エナジー・ゾディアック</title>
+<title>{html.escape(title)}｜Felis cattus</title>
 <meta name="description" content="{html.escape(desc)}">
+<link rel="canonical" href="{url}">{verify}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Felis cattus｜エナジー・ゾディアック">
+<meta property="og:title" content="{html.escape(title)}｜Felis cattus">
+<meta property="og:description" content="{html.escape(desc)}">
+<meta property="og:url" content="{url}">
+<meta property="og:image" content="{BASE}logo.png">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{ld_json}</script>
 <link rel="icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,6 +64,7 @@ def page(title, desc, body, pr=False):
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div class="sister-bar"><span class="sister-label">姉妹サイト</span><a href="https://felis-cattus222.github.io/beauty-site/">美容の道具箱</a><a href="https://felis-cattus222.github.io/felis-cattus/">Felis cattus</a><a href="https://tomyree-source.github.io/sites/fashion/">POSTURE &amp; STYLE</a><a href="https://tomyree-source.github.io/sites/yoga/">Simple Yoga Life</a><a href="https://tomyree-source.github.io/sites/belly-dance/">ベリーダンス手帖</a><a href="https://tomyree-source.github.io/sites/aroma-notes/">アロマと休息の手帖</a></div>
 <header>
 <div class="brand"><a href="index.html"><img class="logo" src="logo.png" alt="Felis cattus ロゴ（黒猫と白猫）"><span class="brand-text">Felis cattus｜エナジー・ゾディアック<span class="brand-sub">星と身体の道具箱</span></span></a></div>
 <nav>{nav}</nav>
@@ -58,16 +83,20 @@ def page(title, desc, body, pr=False):
 </html>
 """
 
-def card(title, text, url, label="楽天で探す", sponsored=False):
+def card(title, text, url, label="楽天で探す", sponsored=False, img=None, alt=""):
     rel = "sponsored nofollow noopener" if sponsored else "noopener"
+    img_html = f'<a class="card-img" href="{url}" target="_blank" rel="{rel}"><img src="{img}" alt="{html.escape(alt)}" loading="lazy"></a>' if img else ""
     return f"""<div class="card">
-<h3>{html.escape(title)}</h3>
+{img_html}<h3>{html.escape(title)}</h3>
 <p>{html.escape(text)}</p>
 <p><a class="btn" href="{url}" target="_blank" rel="{rel}">{label}</a></p>
 </div>"""
 
 def cards(items):
     return '<div class="grid">\n' + "\n".join(items) + "\n</div>"
+
+def cards_img(items):
+    return '<div class="grid cards-img">\n' + "\n".join(items) + "\n</div>"
 
 # ---------- 12 signs (master_correspondence.md, ch.2 flow order canonical) ----------
 SIGNS = [
@@ -87,52 +116,68 @@ SIGNS = [
 ]
 
 # ---------- index ----------
+SLUGS = ["aries", "taurus", "gemini", "cancer", "leo", "virgo", "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"]
 sign_links = "\n".join(
-    f'<a class="sign" href="map.html#{s[0]}">{s[0]}<span>{s[1]}</span></a>' for s in SIGNS)
+    f'<a class="sign" href="sign-{SLUGS[i]}.html">{s[0]}<span>{s[1]}</span></a>' for i, s in enumerate(SIGNS))
 index_body = f"""
 <section class="hero">
-<p class="hero-logo"><img src="logo.png" alt="黒猫と白猫とホロスコープの環"></p>
-<h1>明日の星を、身体で読む。</h1>
-<p class="statement">エナジー・ゾディアックは、12星座と身体・経絡・感情の対応を読み解く、Felis cattus の独自メソッドです。提唱者は臨床30年の鍼灸師。星の位置は天文データで検証し、裏付けのない対応は作りません。</p>
+<div class="hero-visual"><img src="top-hero.webp" alt="星空の下、金のホロスコープの環と月を背景に座る黒猫と白猫"><div class="hero-visual-text"><h1>明日の星を、身体で読む。</h1></div></div>
+<p class="statement">エナジー・ゾディアックは、12星座と身体・経絡・感情の対応を読み解く、Felis cattus の独自メソッドです。提唱者は臨床30年の鍼灸師。星の位置はNASA JPLの天文暦（DE421）で計算し、毎日の記事は公開前に、日付・曜日・月のサイン・天文イベントを全件照合しています。裏付けのない対応は作りません。</p>
 <p>このサイトは、そのメソッドの入口です。毎日の星読みは <a href="https://note.com/felis_cattus">note「Felis cattus」</a> で毎夕更新しています。</p>
 </section>
 <h2>はじめ方｜3つのステップ</h2>
-{cards([
-    card("STEP 1｜毎日の星読みを読む", "明日のチャートと身体のテーマを、毎夕noteで無料配信。まず流れをつかむところから。", "https://note.com/felis_cattus", "noteで読む"),
-    card("STEP 2｜自分の星座の身体マップを知る", "あなたの星座は、身体のどこ・どの経絡・どんな感情と対応しているのか。メソッドの中心にある対応表です。", "map.html", "マップを見る"),
-    card("STEP 3｜自分専用の鑑定書を注文する", "出生図と2027年の流れを読む、あなただけの鑑定書（A4・8ページ）。", "shop.html", "鑑定・商品を見る"),
+{cards_img([
+    card("STEP 1｜毎日の星読みを読む", "明日のチャートと身体のテーマを、毎夕noteで無料配信。まず流れをつかむところから。", "https://note.com/felis_cattus", "noteで読む", img="top-step-note.webp", alt="星空の下で開いた星読みの書物を見る黒猫と白猫"),
+    card("STEP 2｜自分の星座の身体マップを知る", "あなたの星座は、身体のどこ・どの経絡・どんな感情と対応しているのか。メソッドの中心にある対応表です。", "map.html", "マップを見る", img="top-step-map.webp", alt="金の光の線と星座記号に包まれた猫のシルエット"),
+    card("STEP 3｜自分専用の鑑定書を注文する", "出生図と2027年の流れを読む、あなただけの鑑定書（A4・8ページ）。", "shop.html", "鑑定・商品を見る", img="top-step-shop.webp", alt="金のリボンの巻物のそばに座る黒猫と白猫"),
 ])}
+<h2>読みの実例｜週間星読み新聞より</h2>
+<p>毎週日曜のnoteでは、その週の星の流れを振り返る「週間星読み新聞」を出しています。11月9日〜15日の回（新月と、水星・金星の順行が重なった週）から、読みの一部を紹介します。</p>
+<blockquote class="sample-read">明日は「内に深く潜る力」と「外へ大きく動く力」が同時に強い日です。蠍座の太陽と水星は、ひとつのことを掘り下げる集中力を示します。獅子座の火星と木星の重なりは、その掘り下げたものを外へ表現する勢いを添えます。ただ、勢いが前のめりになりやすいところも。無理に一気に進めようとせず、明日は「掘り下げたものを、ひとつだけ形にする」くらいのペースがちょうどよさそうです。</blockquote>
+<p><a class="btn" href="https://note.com/felis_cattus/n/n728ecaca3a2d">週間星読み新聞を読む（note）</a></p>
 <h2>まず自分の星座から</h2>
 <div class="signs">{sign_links}</div>
 <h2>カテゴリ</h2>
-{cards([
-    card("学ぶ｜本の道具箱", "占星術・経絡・身体構造。メソッドの土台になった本と、現場で使われる専門書。", "books.html", "ページを開く"),
-    card("香る｜星座とアロマ", "12星座×アロマ対応表の無料要約との精油リンク。", "aroma.html", "ページを開く"),
-    card("整える｜月と星の道具", "プラネタリウム、月ライト、猫と星の雑貨。夜の星読み時間のお供に。", "goods.html", "ページを開く"),
-    card("猫と暮らす", "楽天のペット用品と、222キャラ工房のLINEスタンプ。", "cats.html", "ページを開く"),
+{cards_img([
+    card("学ぶ｜本の道具箱", "占星術・経絡・身体構造。メソッドの土台になった本と、現場で使われる専門書。", "books.html", "ページを開く", img="top-books.webp", alt="古い本の積み重ねと眼鏡、そばに座る猫"),
+    card("香る｜星座とアロマ", "12星座×アロマ対応表の無料要約との精油リンク。", "aroma.html", "ページを開く", img="top-aroma.webp", alt="月明かりの下のアロマボトルとハーブ、黒猫と白猫"),
+    card("整える｜月と星の道具", "プラネタリウム、月ライト、猫と星の雑貨。夜の星読み時間のお供に。", "goods.html", "ページを開く", img="top-goods.webp", alt="光るムーンランプと壁に映る星を見上げる猫"),
+    card("猫と暮らす", "楽天のペット用品と、222キャラ工房のLINEスタンプ。", "cats.html", "ページを開く", img="top-cats.webp", alt="ペット用品のある室内でくつろぐ黒猫と白猫"),
 ])}
 <h2>Felis cattus の商品（noteで販売中）</h2>
-{cards([
-    card("2027年 年間読み 鑑定書（受注生産）", "あなたの出生図と2027年のトランジットを読む、A4・8ページの鑑定書。月10名まで、¥2,222。", "https://note.com/felis_cattus/n/nf3da15ac7ff5", "noteで注文する"),
-    card("12星座×アロマ対応表", "7つの資料を突き合わせた対応表の有料記事。¥222。無料要約は「香る」のページに。", "aroma.html", "まず無料要約を読む"),
+{cards_img([
+    card("2027年 年間読み 鑑定書（受注生産）", "あなたの出生図と2027年のトランジットを読む、A4・8ページの鑑定書。月10名まで、¥2,222。", "https://note.com/felis_cattus/n/nf3da15ac7ff5", "noteで注文する", img="top-step-shop.webp", alt="金のリボンの巻物のそばに座る黒猫と白猫"),
+    card("12星座×アロマ対応表", "7つの資料を突き合わせた対応表の有料記事。¥222。無料要約は「香る」のページに。", "aroma.html", "まず無料要約を読む", img="top-aroma.webp", alt="月明かりの下のアロマボトルとハーブ、黒猫と白猫"),
+    card("月相×アロマ対応表", "月の満ち欠け8段階で選ぶ香りの対応表。¥222。「12星座×アロマ対応表」と対になる記事。", "https://note.com/felis_cattus/n/n0c1126c25c9a", "noteで見る", img="top-moon.webp", alt="空に弧を描く月の満ち欠けと、見上げる黒猫と白猫"),
 ])}
 """
 write = lambda name, content: open(os.path.join(OUT, name), "w", encoding="utf-8").write(content)
-write("index.html", page("トップ", "「明日の星を、身体で読む。」独自メソッド「エナジー・ゾディアック」の公式サイト。12星座×身体マップ、本、アロマ、月と星のグッズ、鑑定書。", index_body))
+write("index.html", page("エナジー・ゾディアック｜12星座×身体マップと毎日の星読み", "臨床30年の鍼灸師が提唱する独自メソッド「エナジー・ゾディアック」の公式サイト。12星座と身体部位・経絡・感情の対応表、毎日の星読み（note）、星座別アロマ、年間読み鑑定書¥2,222まで。星の位置はNASA JPLの天文暦で検証しています。", index_body, "index.html"))
 
 # ---------- map ----------
 rows = "\n".join(
     f'<div class="card sign-card" id="{s[0]}"><h3>{s[0]} <span>{s[1]}</span></h3>'
     f"<p><strong>身体</strong>：{s[2]}</p><p><strong>経絡</strong>：{s[3]}</p>"
     f"<p><strong>臓腑</strong>：{s[4]}</p><p><strong>感情（情志）</strong>：{s[5]}</p>"
-    f"<p><strong>セルフケア</strong>：{s[6]}</p></div>" for s in SIGNS)
+    f"<p><strong>セルフケア</strong>：{s[6]}</p>"
+    f'<p><a href="sign-{SLUGS[i]}.html">{s[0]}の詳しい読み →</a></p></div>' for i, s in enumerate(SIGNS))
 map_body = f"""
-<h1>12星座×身体マップ</h1>
-<p>エナジー・ゾディアックの中心にある対応表です。身体部位は連載「解体新書」第4回、経絡は連載「星と巡る身体の地図」第2章の流注順（肺経から始まる気の巡りの順）を正本としています。感情（情志）は『黄帝内経』以来の伝統対応で、経絡の表裏を介した接続の場合はその旨を添えています。裏付けのない対応は作らず、空欄のままにしています。</p>
+<h1>12星座×身体マップ｜対応表</h1>
+<p>エナジー・ゾディアックの中心にある対応表です。12星座それぞれに、身体部位・担当経絡・五臓六腑・感情（情志）・セルフケアを対応させています。身体部位は連載「解体新書」第4回、経絡は連載「星と巡る身体の地図」第2章の流注順（肺経から始まる気の巡りの順）を正本としています。感情（情志）は『黄帝内経』以来の伝統対応で、経絡の表裏を介した接続の場合はその旨を添えています。裏付けのない対応は作らず、空欄のままにしています。</p>
+<h2>この対応表の読み方</h2>
+<p>5つの欄は、それぞれ別の体系から来ています。<strong>身体部位</strong>は、西洋占星術に古くから伝わる身体対応（メロテシア）の伝統です。<strong>経絡</strong>は中医学の十二経絡で、星座の順番に気の巡りの順（流注順）を重ねています。<strong>臓腑</strong>は、その経絡が属する五臓六腑です。<strong>感情（情志）</strong>は、五臓に結びつくとされてきた感情の伝統対応で、経絡の表裏ペアを介してつながる場合は「表裏を介した接続」と明記しています。<strong>セルフケア</strong>は、その星座のテーマに沿った、足と呼吸を中心とした小さな実践です。星座名をタップすると、その星座だけを詳しく読むページに進めます。</p>
+<h2>経絡は「流注順」が正本です</h2>
+<p>経絡の対応は、肺経から始まって大腸経・胃経・脾経・心経・小腸経・膀胱経・腎経・心包経・三焦経・胆経・肝経と巡る「流注順」に統一しています。これは中医学で気の流れが一周する順番そのもので、牡羊座に肺経が来るのは「一日の気は肺から始まる」という伝統の考え方に基づきます。初期の記事には別の割り当てが混ざっていた時期がありましたが、現在はこの流注順を正本として、すべての記事と鑑定書を統一しています。</p>
 <div class="grid">{rows}</div>
+<h2>五臓六腑と感情（情志）について</h2>
+<p>中医学の伝統では、五臓には感情が結びつくとされてきました。肝は怒、心は喜、脾は思、肺は悲・憂、腎は恐・驚です。この表では、星座の担当経絡が属する臓腑の情志を基本とし、経絡の表裏ペア（たとえば大腸経と肺経）を介してつながる場合は、その旨を添えて書いています。心包と三焦には五志の単独対応がないため、射手座と山羊座の情志欄は空欄のままにしています。伝統にない対応を、もっともらしく作ることはしません。これらは伝統的な考え方の紹介であり、医療の診断や治療の根拠ではありません。</p>
+<h2>エレメントで見る4つのグループ</h2>
+<p><strong>火の星座（牡羊座・獅子座・射手座）</strong>は、頭・心臓・大腿部と、始める力・燃える力に対応します。経絡では肺経・心経・心包経が担い、身体の「点火」と循環の中心です。<strong>地の星座（牡牛座・乙女座・山羊座）</strong>は、喉・腸・膝と、受け止めて形にする力に対応します。大腸経・小腸経・三焦経が担い、消化と構造のグループです。<strong>風の星座（双子座・天秤座・水瓶座）</strong>は、肩と腕・腰・下腿と、巡らせて伝える力に対応します。胃経・膀胱経・胆経が担い、流れとバランスのグループです。<strong>水の星座（蟹座・蠍座・魚座）</strong>は、胸と胃・骨盤底・足裏と、蓄えて深める力に対応します。脾経・腎経・肝経が担い、滋養と再生のグループです。</p>
+<h2>連載で読む</h2>
+<p>この対応表は、noteの連載「星と巡る身体の地図」で1星座ずつ章を重ねて解説しています。目次と各章へのリンクは <a href="https://note.com/felis_cattus/n/na1ab441528d1">「12のライン身体マップ図鑑｜目次」</a> にまとめています。対応表の成り立ちを解説した第2章「12のラインの対応」も、そこから読めます。</p>
 <p>この対応をあなたの出生図で読むのが、年間読み鑑定書です。詳しくは <a href="shop.html">鑑定・商品</a> のページへ。</p>
 """
-write("map.html", page("12星座×身体マップ", "12星座と身体部位・経絡・臓腑・感情・セルフケアの対応表。エナジー・ゾディアックの中心素材。", map_body))
+write("map.html", page("12星座×身体マップ対応表｜星座別の身体部位・経絡・五臓六腑と感情", "12星座それぞれの身体部位・担当経絡・五臓六腑・感情（情志）・セルフケアをまとめた対応表。経絡は流注順が正本、裏付けのない対応は作らない——エナジー・ゾディアックの中心素材を全公開しています。", map_body, "map.html"))
 
 # ---------- books ----------
 books = [
@@ -158,7 +203,7 @@ specialist = [
 books_body = "<h1>学ぶ｜本の道具箱</h1><p>メソッドの土台になった本を、テーマ別に置いています。価格は変動するため表示していません。各リンク先でご確認ください。リンクは楽天市場の検索ページへの通常リンクです（楽天アフィリエイトリンクは準備中）。</p>"
 books_body += "<h2>占星術・経絡・身体構造の参考書</h2>" + cards([card(t, x, rsearch(t)) for t, x, a in books])
 books_body += "<h2>現場で使われる専門書</h2>" + cards([card(t, x, rsearch(t)) for t, x, a in specialist])
-write("books.html", page("学ぶ｜本の道具箱", "占星術・経絡・筋膜・解剖学の参考書と専門書。エナジー・ゾディアックの土台の本棚。", books_body))
+write("books.html", page("占星術と経絡の本｜メソッドの土台になった参考書と専門書", "西洋占星術の教科書から経絡・解剖学の専門書まで、エナジー・ゾディアックの土台になった本棚。鏡リュウジの占星術の教科書、経穴インパクト、プロメテウス解剖学アトラスなど、初学者向けと現場の専門書を分けて紹介します。", books_body, "books.html"))
 
 # ---------- aroma ----------
 oils = [
@@ -177,7 +222,7 @@ aroma_body = """
 <h2>香りの候補</h2>
 <p>実在が確認できた精油だけを置いています。リンクは楽天市場の検索ページへの通常リンクです（楽天アフィリエイトリンクは準備中）。</p>
 """ + cards([card(t, x, rsearch(t)) for t, x, a in oils])
-write("aroma.html", page("香る｜星座とアロマ", "12星座×アロマ対応表の考え方と、精油の楽天検索リンク。精油は猫に使わない注意書き付き。", aroma_body))
+write("aroma.html", page("12星座×アロマ対応表｜星座別のおすすめ精油と選び方", "12星座と精油の対応を、7つの資料を突き合わせて整理。星座のエレメントと経絡・感情のテーマから選ぶ、Felis cattusのアロマ対応表（有料記事¥222）の考え方と無料要約を紹介します。精油は猫には使いません。", aroma_body, "aroma.html"))
 
 # ---------- goods ----------
 goods = [
@@ -193,7 +238,7 @@ goods = [
 ]
 goods_body = "<h1>整える｜月と星の道具</h1><p>月・星・猫のモチーフの道具と雑貨。週替わりコーナー「今週の開運グッズ」（note・毎週月曜）の置き場も兼ねています。縁起物・インテリアとしての紹介で、効果を約束するものではありません。価格は変動するため表示していません。</p>"
 goods_body += "<p>リンクは楽天市場の検索ページへの通常リンクです（楽天アフィリエイトリンクは準備中）。</p>" + cards([card(t, x, rsearch(t)) for t, x, a in goods])
-write("goods.html", page("整える｜月と星の道具", "プラネタリウム、月ライト、招き猫、猫と星の雑貨。", goods_body))
+write("goods.html", page("月と星のグッズ｜プラネタリウム・月ライト・猫モチーフ雑貨", "ホームプラネタリウム、浮く月ライト、招き猫、黒猫と白猫の雑貨など、星読みの夜のお供になる月と星の道具。noteの週替わりコーナー「今週の開運グッズ」の置き場も兼ねています。効果を約束するものではありません。", goods_body, "goods.html"))
 
 # ---------- cats (Rakuten links verbatim from affiliate_materials_2026-11-15.md) ----------
 rakuten = [
@@ -212,7 +257,7 @@ cats_body += """
 <p><a class="btn" href="https://store.line.me/stickershop/author/6795103/ja" target="_blank" rel="noopener">222キャラ工房のページ</a></p>
 <p>猫モチーフの雑貨は <a href="goods.html">整える</a> のページにも置いています。</p>
 """
-write("cats.html", page("猫と暮らす", "楽天の猫用品6点と、222キャラ工房のLINEスタンプ。", cats_body, pr=True))
+write("cats.html", page("猫用品とLINEスタンプ｜楽天ペット用品と222キャラ工房", "一緒に暮らす猫のための楽天ペット用品6点（フード・猫砂・爪とぎ・ケア用品）と、222キャラ工房のLINEスタンプ全14セット。Felis cattusの黒猫と白猫の世界観で選んでいます。", cats_body, "cats.html", pr=True))
 
 # ---------- shop ----------
 shop_body = """
@@ -220,13 +265,24 @@ shop_body = """
 <p>Felis cattus の自社商品は note で販売しています（決済・受け渡しは note の仕組みを使います）。</p>
 """ + cards([
     card("2027年 年間読み 鑑定書（受注生産）¥2,222", "出生図＋2027年のトランジットを読むA4・8ページの鑑定書PDF。月10名まで／納期7日以内。注文はnoteのチケット記事から、申込フォームで出生日時・場所をお聞きします。", "https://note.com/felis_cattus/n/nf3da15ac7ff5", "noteで注文する"),
-    card("12星座×アロマ対応表 ¥222", "7資料を突き合わせた対応表の有料記事。無料要約はこのサイトの「香る」に。", "https://note.com/felis_cattus", "noteで見る"),
+    card("12星座×アロマ対応表 ¥222", "7資料を突き合わせた対応表の有料記事。無料要約はこのサイトの「香る」に。", "https://note.com/felis_cattus/n/n5099cf9691ef", "noteで見る"),
+    card("月相×アロマ対応表 ¥222", "月の満ち欠け8段階で選ぶ香りの対応表。「12星座×アロマ対応表」と対になる、月の側の地図。", "https://note.com/felis_cattus/n/n0c1126c25c9a", "noteで見る"),
     card("恋の設計図（ハート・メロテシア入門記事）¥555", "恋愛版メソッド「ハート・メロテシア」の入門記事。年明け〜バレンタインの時期に発売予定。", "https://note.com/felis_cattus", "発売をnoteで待つ"),
 ]) + """
+<h2>鑑定書の見本</h2>
+<p>年間読み鑑定書のサンプル（1977年4月18日生まれの方の例）です。構成は、表紙／出生チャート図と配置表／チャートの骨格／2027年全体テーマ／月別読み／身体マップとセルフケア／おわりに、の全8ページ。星の位置はNASA JPLの天文暦で計算し、文章中の日付・サイン・角度は納品前に検証ツールで照合します。</p>
+<div class="samples">
+<figure><img src="sample_cover.webp" alt="鑑定書サンプルの表紙"><figcaption>表紙</figcaption></figure>
+<figure><img src="sample_chart.webp" alt="鑑定書サンプルの出生チャート図"><figcaption>出生チャート図</figcaption></figure>
+<figure><img src="sample_monthly.webp" alt="鑑定書サンプルの月別読み"><figcaption>月別読み</figcaption></figure>
+<figure><img src="sample_body.webp" alt="鑑定書サンプルの身体マップ"><figcaption>身体マップ</figcaption></figure>
+</div>
+<h2>お預かりする情報について</h2>
+<p>鑑定のお申し込みでは、申込フォームで生年月日・出生時刻・出生地と、納品先のメールアドレスをお聞きします。これらの情報は、鑑定書の制作と納品のためだけに使います。第三者へ提供することはなく、ほかの目的に使うこともありません。鑑定の内容や、お申し込みがあったこと自体を公開したり、宣伝に使ったりすることもありません。制作後の情報の削除をご希望の場合は、メールでご連絡いただければ対応します。</p>
 <h2>毎日の発信</h2>
 <p>note（毎日の星読み）／ Instagram <a href="https://www.instagram.com/felis.cattus222">@felis.cattus222</a> ／ Threads <a href="https://www.threads.com/@felis.cattus222">@felis.cattus222</a> ／ X <a href="https://x.com/felis_cattus222">@felis_cattus222</a></p>
 """
-write("shop.html", page("鑑定・商品", "年間読み鑑定書¥2,222、アロマ対応表¥222、恋の設計図¥555（予定）。", shop_body))
+write("shop.html", page("鑑定書と有料記事｜2027年年間読み¥2,222・アロマ対応表¥222", "出生図と2027年の流れを読む年間読み鑑定書¥2,222（月10名まで・A4全8ページの見本あり）、12星座×アロマ対応表¥222、月相×アロマ対応表¥222。お預かりする出生情報の取り扱い方針も明記しています。", shop_body, "shop.html"))
 
 # ---------- about / disclosure ----------
 about_body = """
@@ -241,7 +297,7 @@ about_body = """
 <h2>お問い合わせ</h2>
 <p>メール：felis.cattus222@gmail.com</p>
 """
-write("about.html", page("Felis cattusについて", "エナジー・ゾディアックとは。提唱者・平賀建人（臨床30年・鍼灸師）のプロフィールと問い合わせ先。", about_body))
+write("about.html", page("Felis cattusについて｜提唱者・平賀建人（鍼灸師・臨床30年）", "独自メソッド「エナジー・ゾディアック」とは何か。提唱者・平賀建人（臨床30年、鍼灸師／登録販売者／パーソナルトレーナー、武術45年）のプロフィールと、「裏付けのない対応は作らない」というメソッドの約束について。", about_body, "about.html"))
 
 disclosure_body = """
 <h1>アフィリエイト開示・プライバシー</h1>
@@ -252,7 +308,58 @@ disclosure_body = """
 <h2>プライバシー</h2>
 <p>当サイトは静的サイトであり、独自に個人情報を収集する仕組みを持ちません。アクセス解析を導入する場合は、このページで告知します。お問い合わせメールでいただいた情報は、返信以外の目的には使いません。</p>
 """
-write("disclosure.html", page("アフィリエイト開示・プライバシー", "アフィリエイト開示とプライバシー方針。", disclosure_body))
+write("disclosure.html", page("アフィリエイト開示・プライバシー", "当サイトのアフィリエイト広告の開示、表現についての方針、プライバシー（個人情報の取り扱い）についてまとめています。", disclosure_body, "disclosure.html"))
+
+# ---------- sign pages (SEO article layer, 2026-11-16) ----------
+SHORT_MERIDIAN = ["肺経", "大腸経", "胃経", "脾経", "心経", "小腸経", "膀胱経", "腎経", "心包経", "三焦経", "胆経", "肝経"]
+SIGN_NOTES = [
+    "始まりの星座です。肺経は十二経絡の巡りの起点で、呼吸と「境界」を担うとされてきました。頭部・脳・顔面に対応し、セルフケアの軸は、頭頂の百会と足裏の湧泉を結ぶ垂直の柱です。吸う息とともに天地を貫く一本の軸を思い描くことが、この星座の実践の入口になります。連載「星と巡る身体の地図」第3章で、章を挙げて扱いました。",
+    "受け取る星座です。大腸経は肺経と表裏のペアで、「純化」を担います。喉・頸部・甲状腺に対応し、セルフケアの軸は足裏全体の接地です。大地に根ざす感覚を丁寧に味わうことが、受け取る力の土台になります。連載「星と巡る身体の地図」第4章で、章を挙げて扱いました。",
+    "巡らせる星座です。胃経は「情報の摂取」——取り入れて咀嚼する働きに重ねて読みます。肩・腕・手と肺に対応し、セルフケアの軸は拇指球の踏み込みです。世界を取り込むときの前進の力を、足の前方で感じる星座です。",
+    "守る星座です。脾経は「滋養・安心」を担い、胸部・胃・乳房に対応します。セルフケアの軸は土踏まずの柔軟性です。内なる聖域を守り、大地のぬくもりで基盤を安定させることが、この星座のテーマになります。",
+    "輝く星座です。心経は「魂の喜び」を担い、心臓・背中・脊柱に対応します。セルフケアの軸は踵（かかと）の安定です。自己の核を支える不動の軸が、背筋の伸びに表れる星座です。",
+    "整える星座です。小腸経は「秩序」——清濁を分ける働きに重ねて読みます。腹部・腸・消化器系に対応し、セルフケアの軸は足裏の外側エッジです。必要なものだけを識別する境界線を、身体の側でも意識する星座です。",
+    "量る星座です。膀胱経は「均衡」を担い、腰部・腎臓・バランス感覚に対応します。セルフケアの軸は、左右の足重心の均等化です。自分と世界の均衡点を、立つ姿勢の中で探す星座です。",
+    "深める星座です。腎経は「変容・意志」を担い、生殖器・排泄器官・骨盤底に対応します。セルフケアの軸は湧泉の吸気です。大地の深いところから意志を汲み上げるイメージが、この星座の実践になります。",
+    "跳ぶ星座です。心包経は「境界」を担い、臀部・大腿部（太もも）・肝臓に対応します。セルフケアの軸は足首の解放と回転です。心包には五志の単独対応がないため、情志の欄は空欄のままにしています。理想へ跳躍するための自由な支点を持つ星座です。",
+    "積む星座です。三焦経は「連動」を担い、膝・骨格全体・皮膚に対応します。セルフケアの軸は膝の柔軟なクッションです。三焦にも五志の単独対応がないため、情志の欄は空欄のままにしています。社会の重圧を、膝を通じて地に逃がす星座です。",
+    "変える星座です。胆経は「変革・決断」を担い、下腿・足首・循環器系に対応します。セルフケアの軸は足の外側のラインです。既存の枠を突破する踏ん張りが、この星座の持ち味になります。",
+    "溶ける星座です。肝経は「統合・再生」を担い、足・足裏・リンパ系に対応します。セルフケアの軸は足指の完全な解放です。流注順の締めくくりの経絡で、巡りはここからまた肺経へと戻っていきます。すべてを大地（海）へ還す統合の星座です。",
+]
+CHAPTER_URLS = {
+    "牡羊座": ("第3章｜牡羊座——頭部と肺経、始まりの呼吸", "https://note.com/felis_cattus/n/n68f6074f9907"),
+    "牡牛座": ("第4章｜牡牛座——喉と大腸経、受け取る力の土台", "https://note.com/felis_cattus/n/nc57037a113bc"),
+}
+INDEX_ARTICLE = "https://note.com/felis_cattus/n/na1ab441528d1"
+for i, s in enumerate(SIGNS):
+    slug = SLUGS[i]
+    prev_s = SIGNS[i - 1]
+    next_s = SIGNS[(i + 1) % 12]
+    if s[0] in CHAPTER_URLS:
+        ct, cu = CHAPTER_URLS[s[0]]
+        series_link = f'<p>この星座は、noteの連載「星と巡る身体の地図」で章を挙げて解説しています。<a href="{cu}">連載{ct}（note）</a>／<a href="{INDEX_ARTICLE}">連載の目次</a></p>'
+    else:
+        series_link = f'<p>この星座の連載の章は順次公開中です。<a href="{INDEX_ARTICLE}">連載「星と巡る身体の地図」の目次（note）</a>から、公開済みの章を読めます。</p>'
+    body = f"""
+<p><a href="map.html">← 12星座×身体マップ（対応表）へ戻る</a></p>
+<h1>{s[0]}×{SHORT_MERIDIAN[i]}｜{s[2]}の身体マップ</h1>
+<p>{s[0]}（{s[1]}）の身体対応を、エナジー・ゾディアックの対応表から抜き出して解説するページです。対応の正本は <a href="map.html">12星座×身体マップ</a> で、ここでは{s[0]}だけを取り上げます。</p>
+<div class="card sign-card">
+<p><strong>身体</strong>：{s[2]}</p><p><strong>経絡</strong>：{s[3]}</p>
+<p><strong>臓腑</strong>：{s[4]}</p><p><strong>感情（情志）</strong>：{s[5]}</p>
+<p><strong>セルフケア</strong>：{s[6]}</p>
+</div>
+<h2>{s[0]}の読み</h2>
+<p>{SIGN_NOTES[i]}</p>
+<h2>セルフケアの考え方</h2>
+<p>{s[6]}——これが{s[0]}のセルフケアの軸です。星読みは自己理解のための読み物であり、ここでの実践は、その日の自分の身体を眺めるための小さな習慣として提案しています。体調に心配がある場合は、専門家へご相談ください。</p>
+{series_link}
+<p>自分の出生図でこの対応を読む場合は、<a href="shop.html">年間読み鑑定書</a>であなたの{s[0]}の天体と2027年の流れを合わせて読みます。</p>
+<p class="sign-nav"><a href="sign-{SLUGS[i - 1]}.html">← {prev_s[0]}</a>　｜　<a href="sign-{SLUGS[(i + 1) % 12]}.html">{next_s[0]} →</a></p>
+"""
+    write(f"sign-{slug}.html", page(f"{s[0]}と{SHORT_MERIDIAN[i]}｜{s[2]}の身体対応とセルフケア",
+        f"{s[0]}の身体対応（{s[2]}）、担当経絡の{s[3]}、臓腑の{s[4]}、感情（情志）とセルフケア。エナジー・ゾディアックの12星座×身体マップ、{s[0]}のページです。",
+        body, f"sign-{slug}.html"))
 
 # ---------- style / robots / sitemap / readme ----------
 write("style.css", """
@@ -260,6 +367,11 @@ write("style.css", """
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;line-height:1.8}
 a{color:var(--gold)}
+.sister-bar{display:flex;gap:18px;align-items:center;overflow-x:auto;background:var(--bg2);border-bottom:1px solid #34345e;padding:7px 16px;font-size:.78rem;letter-spacing:.06em;white-space:nowrap;scrollbar-width:none}
+.sister-bar::-webkit-scrollbar{display:none}
+.sister-bar a{color:var(--ink);text-decoration:none;flex:0 0 auto}
+.sister-bar a:hover{color:var(--gold)}
+.sister-label{color:var(--gold);font-weight:600;flex:0 0 auto}
 header{background:var(--bg2);padding:14px 20px;border-bottom:1px solid var(--gold)}
 .brand a{color:var(--ink);text-decoration:none;font-weight:bold;font-size:1.1rem;display:flex;align-items:center;gap:12px}
 .brand .logo{width:46px;height:46px;border-radius:50%;flex:none}
@@ -286,9 +398,24 @@ h2{color:var(--gold);border-bottom:1px solid #34345e;padding-bottom:4px;margin-t
 .pr,.warn{background:#2a2417;border:1px solid var(--gold);border-radius:8px;padding:10px 14px;font-size:.9rem}
 footer{background:var(--bg2);padding:20px;font-size:.85rem;color:var(--sub);border-top:1px solid #34345e}
 .sign-card span{font-size:.8rem;color:var(--sub)}
+.samples{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-top:16px}
+.samples figure{margin:0}
+.samples img{width:100%;border-radius:6px;border:1px solid var(--gold);display:block}
+.samples figcaption{font-size:.85rem;color:var(--sub);text-align:center;margin-top:6px}
+blockquote.sample-read{margin:16px 0;padding:14px 18px;background:var(--bg2);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;font-size:.98rem}
+.hero-visual{position:relative;border-radius:14px;overflow:hidden;margin:0 0 20px;background:#0a0a1c}
+.hero-visual img{display:block;width:100%;height:auto}
+.hero-visual-text{position:absolute;left:0;top:0;bottom:0;width:58%;display:flex;flex-direction:column;justify-content:center;padding:28px 34px;background:linear-gradient(90deg,rgba(10,10,28,.90) 30%,rgba(10,10,28,.50) 68%,rgba(10,10,28,0))}
+.hero-visual-text h1{font-size:2rem;color:var(--gold);margin:0;line-height:1.4}
+.cards-img .card{padding:0 0 16px;overflow:hidden}
+.cards-img .card h3{padding:14px 16px 0}
+.cards-img .card p{padding:0 16px}
+.card-img{display:block}
+.card-img img{display:block;width:100%;height:180px;object-fit:cover}
+@media(max-width:640px){.hero-visual-text{width:100%;background:linear-gradient(180deg,rgba(10,10,28,.88),rgba(10,10,28,.45) 75%,rgba(10,10,28,0));justify-content:flex-start;padding:18px 20px}.hero-visual-text h1{font-size:1.45rem}}
 """)
-pages = ["index.html","map.html","books.html","aroma.html","goods.html","cats.html","shop.html","about.html","disclosure.html"]
-sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "\n".join(f"<url><loc>{BASE}{p}</loc></url>" for p in pages) + "\n</urlset>\n"
+pages = ["index.html","map.html","books.html","aroma.html","goods.html","cats.html","shop.html","about.html","disclosure.html"] + [f"sign-{s}.html" for s in SLUGS]
+sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "\n".join(f"<url><loc>{BASE if p == 'index.html' else BASE + p}</loc></url>" for p in pages) + "\n</urlset>\n"
 write("sitemap.xml", sitemap)
 write("robots.txt", f"User-agent: *\nAllow: /\nSitemap: {BASE}sitemap.xml\n")
 write("README.md", """# Felis cattus｜エナジー・ゾディアック（星と身体の道具箱）
